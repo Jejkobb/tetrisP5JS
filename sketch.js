@@ -10,10 +10,14 @@ var directions = [
     [ 1, 0],
     [ 0, 1]
 ];
+var visited = [];
+var emptyGrid = [];
 
 function setup() {
     createCanvas(blockWidth*boardWidth, blockWidth*boardHeight);
-    grid = createMap(boardWidth, boardHeight);
+    grid = createMap(boardWidth, boardHeight, -1);
+    visited = createMap(boardWidth, boardHeight, false);
+    emptyGrid = createMap(boardWidth, boardHeight, false);
 }
 
 function draw() {
@@ -63,38 +67,31 @@ function draw() {
 
 //FUNCTIONS
 
-function hasSameNeighbours(x,y){
-    for(var d = 0; d < directions.length; d++){
-        try {
-            if(grid[x][y] == grid[x+directions[d][0]][y+directions[d][1]]){
-                return true;
-            }
-        }catch{}
+function getRegionSize(matrix, row, column, key){
+    if(row < 0 || column < 0 || row > 9 || column > 18){
+        return 0;
     }
-}
-
-function followConnection(blocks){
-    for(var b = 0; b < blocks.length; b++){
-        var neighbours = [];
-        //CHECK NEIGHBOUR
-        for(var d = 0; d < directions.length; d++){
-            try{
-                if(grid[blocks[b][0] + directions[d][0]][blocks[b][1] + directions[d][1]] == grid[blocks[b][0]][blocks[b][1]] && !blocks.includes([blocks[b][0] + directions[d][0], blocks[b][1] + directions[d][1]])){
-                    neighbours.push([blocks[b][0] + directions[d][0], blocks[b][1] + directions[d][1]]);
-                }
-            }catch(e){print(e)}
-        }
+    if(matrix[row][column] != key){
+        return 0;
     }
-    return blocks;
+    if(visited[row][column] == true){
+        return 0;
+    }
+    var size = 1;
+    for(var d = 0; d < 4; d++){
+        size+=getRegionSize(matrix,row+directions[d][0],column+directions[d][1], key);
+    }
+    visited[row][column] = true;
+    return size;
 }
 
 function checkForConnections(){
     for(var x = 0; x < boardWidth; x++){
         for(var y = 0; y < boardHeight; y++){
             if(typeof grid[x][y] != "string" && grid[x][y] != -1){
-                if(hasSameNeighbours(x,y)){
-                    print(followConnection([[x,y]]));
-                }
+                visited = emptyGrid;
+                var size = getRegionSize(grid, x, y, grid[x][y]);
+                print(size);
             }
         }
     }
@@ -165,12 +162,12 @@ function moveBlock(dir){
     }
 }
 
-function createMap(columnCount, rowCount){
+function createMap(columnCount, rowCount, value){
     const grid = [];
     for(let x = 0; x < columnCount; x++){
         grid[x] = [];
         for(let y = 0; y < rowCount; y++){
-            grid[x][y] = -1;
+            grid[x][y] = value;
             //grid[x][y] = getRandomInt(colors.length);
         }
     }
