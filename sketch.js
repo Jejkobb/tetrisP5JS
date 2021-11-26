@@ -1,4 +1,4 @@
-var blockWidth = 50;
+var blockWidth = 30;
 var boardWidth = 10, boardHeight = 19;
 var grid, counter = 0;
 var colors = ["#ABDEE6", "#FF968A", "#97C1A9", "#CBAACB"];
@@ -67,22 +67,8 @@ function draw() {
 
 //FUNCTIONS
 
-function getRegionSize(matrix, row, column, key){
-    if(row < 0 || column < 0 || row > 9 || column > 18){
-        return 0;
-    }
-    if(matrix[row][column] != key){
-        return 0;
-    }
-    if(visited[row][column] == true){
-        return 0;
-    }
-    var size = 1;
-    for(var d = 0; d < 4; d++){
-        size+=getRegionSize(matrix,row+directions[d][0],column+directions[d][1], key);
-    }
-    visited[row][column] = true;
-    return size;
+function dfs(matrix, row, column, key){
+    
 }
 
 function checkForConnections(){
@@ -90,7 +76,7 @@ function checkForConnections(){
         for(var y = 0; y < boardHeight; y++){
             if(typeof grid[x][y] != "string" && grid[x][y] != -1){
                 visited = emptyGrid;
-                var size = getRegionSize(grid, x, y, grid[x][y]);
+                var size = dfs(grid, x, y, grid[x][y]);
                 print(size);
             }
         }
@@ -162,12 +148,12 @@ function moveBlock(dir){
     }
 }
 
-function createMap(columnCount, rowCount, value){
+function createMap(height, width, value){
     const grid = [];
-    for(let x = 0; x < columnCount; x++){
-        grid[x] = [];
-        for(let y = 0; y < rowCount; y++){
-            grid[x][y] = value;
+    for(let row = 0; row < height; row++){
+        grid[row] = [];
+        for(let col = 0; col < width; col++){
+            grid[row][col] = value;
             //grid[x][y] = getRandomInt(colors.length);
         }
     }

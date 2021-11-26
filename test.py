@@ -19,13 +19,13 @@ def getRegionSize(matrix: list, row: int, col: int):
         return 0
     if(matrix[row][col] == 0):
         return 0
-    size = 1
+    __size = 1
     matrix[row][col] = 0
     for r in range(row-1,row+1):
         for c in range(col-1,col+1):
             if r != row or c != col:
-                size += getRegionSize(matrix, r, c)
-    return size
+                __size += getRegionSize(matrix, r, c)
+    return __size
 
 for row in range(len(grid)):
     for col in range(len(grid[row])):
