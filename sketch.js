@@ -4,19 +4,17 @@ var grid, counter = 0;
 var colors = ["#ABDEE6", "#FF968A", "#97C1A9", "#CBAACB"];
 var move = 0, speed = 30;
 var currentX = 4;
-var directions = [
+var dir = [
     [-1, 0],
     [ 0,-1],
     [ 1, 0],
     [ 0, 1]
 ];
-var visited = [];
 var emptyGrid = [];
 
 function setup() {
     createCanvas(blockWidth*boardWidth, blockWidth*boardHeight);
-    grid = createMap(boardWidth, boardHeight, -1);
-    visited = createMap(boardWidth, boardHeight, false);
+    grid = createMap(boardHeight, boardWidth, -1);
     emptyGrid = createMap(boardWidth, boardHeight, false);
 }
 
@@ -44,18 +42,18 @@ function draw() {
     if(counter > speed){
         checkForConnections();
         var moved = false;
-        for(var x = boardWidth-1; x >= 0; x--){
-            for(var y = boardHeight-1; y >= 0; y--){
-                if(grid[x][y] > -1){
-                    if(grid[x][y+1] == -1 && y+1 != boardHeight){
-                        grid[x][y+1] = grid[x][y];
-                        grid[x][y] = -1;
+        for(var row = boardHeight-1; row >= 0; row--){
+            for(var col = boardWidth-1; col >= 0; col--){
+                if(grid[row][col] > -1){
+                    if(grid[row][col+1] == -1 && col+1 != boardHeight){
+                        grid[row][col+1] = grid[row][col];
+                        grid[row][col] = -1;
                         moved = true;
                     }else{
-                        grid[x][y] = parseInt(grid[x][y]);
+                        grid[row][col] = parseInt(grid[row][col]);
                     }
                 }
-                if(x == 0 && y == 0 && moved == false){
+                if(row == 0 && col == 0 && moved == false){
                     //SPAWN NEW BLOCk
                     newBlock();
                 }
@@ -67,17 +65,35 @@ function draw() {
 
 //FUNCTIONS
 
-function dfs(matrix, row, column, key){
-    
+function dfs(matrix, row, col, key){
+    if(row < 0 || col < 0 || row >= boardHeight || col >= boardWidth){
+        return 0;
+    }
+    if(matrix[row][col] != key){
+        return 0;
+    }
+    var size = [[row,col]]
+    matrix[row][col] = -1
+    for(var d = 0; d < dir.length; d++){
+        var arr = dfs(matrix, row+dir[d][0], row+dir[d][1], key)
+        if(arr != 0){
+            for(var a = 0; a < arr.length; a++){
+                size.push(arr[a]);
+            }
+        }
+    }
+    return size
 }
 
 function checkForConnections(){
-    for(var x = 0; x < boardWidth; x++){
-        for(var y = 0; y < boardHeight; y++){
-            if(typeof grid[x][y] != "string" && grid[x][y] != -1){
-                visited = emptyGrid;
-                var size = dfs(grid, x, y, grid[x][y]);
-                print(size);
+    var gridCopy = grid;
+    for(var row = 0; row < boardHeight; col++){
+        for(var col = 0; col < boardWidth; col++){
+            if(typeof grid[row][col] != "string" && grid[row][col] != -1){
+                var arr = dfs(gridCopy, row, col, grid[row][col]);
+                if(arr != 0){
+                    print(arr);
+                }
             }
         }
     }
@@ -86,7 +102,7 @@ function checkForConnections(){
 function newBlock(){
     if(grid[currentX][0] != -1){
         //LOSE
-        grid = createMap(boardWidth, boardHeight);
+        grid = createMap(boardHeight, boardWidth, -1);
     }else{
         grid[currentX][0] = getRandomInt(colors.length).toString();
     }
